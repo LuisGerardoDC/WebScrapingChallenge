@@ -1,0 +1,5 @@
+pyyaml
+requests
+lxml
+urllib3
+regex
