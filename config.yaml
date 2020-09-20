@@ -1,0 +1,6 @@
+amazon:
+  url: https://www.amazon.com.mx/
+  products:
+    product_links: '//div[@class="a-section aok-relative s-image-square-aspect"]/../@href'
+    product_name: '//span[@id="productTitle"]/text()'
+    product_price: '//span[@id="priceblock_ourprice"]/text()'
