@@ -18,9 +18,13 @@ class Page:
 
     def _visit(self, url):
         response = requests.get(url)
-        home = response.content.decode('utf-8')
-        self._html = lxhtml.fromstring(home)
-    
+        if(response.status_code == 200):
+            home = response.content.decode('utf-8')
+            self._html = lxhtml.fromstring(home)
+        else:
+            raise ValueError(f'Error {response.status_code}')
+        
+
 
 class HomePage(Page):
     def __init__(self,url):
@@ -37,10 +41,12 @@ class ArticlePage(Page):
 
     @property
     def name(self):
+        print(self._queries['product_name'])
         result = self._select(self._queries['product_name'])
-        return result
+        return result[0].text if len(result) else ''
 
     @property
     def price(self):
+        print(self._queries['product_price'])
         result = self._select(self._queries['product_price'])
-        return result
+        return result[0].text if len(result) else ''

@@ -17,13 +17,18 @@ def _news_scraper(product):
     host = config()['amazon']['url']
     product = 's?k={}'.format(product.replace(' ','+'))
     logging.info(f'Beginning scraper for {host}{product}')
-    homepage = products.HomePage(host+product)
+    try:
+        homepage = products.HomePage(host+product)
+        for link in homepage.product_links:
+            builded_link = _build_link(host,link)
+            try:
+                _fetch_article(builded_link)
+            except ValueError as ve:
+                print(f'product page: {ve}')
 
-    for link in homepage.product_links:
-        builded_link = _build_link(host,link)
-        _fetch_article(builded_link)
-        
 
+    except ValueError as ve:
+        print(f'Home page: {ve}')
 
 def _fetch_article(link):
     logger.info(f'Start fetching article at {link}')
