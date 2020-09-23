@@ -1,4 +1,5 @@
 import scrapy
+from scrapy.http import HtmlResponse as htmlres
 
 class ProductsSpider(scrapy.Spider):
     name = 'products'
@@ -6,8 +7,8 @@ class ProductsSpider(scrapy.Spider):
         'https://www.amazon.com.mx/'
     ]
     custom_settings = {
-        'FEED_URI': 'products.csv',
-        'FEED_FORMAT' :'csv',
+        'FEED_URI': 'products.json',
+        'FEED_FORMAT' :'json',
         'CURRENT_REQUESTS': 24,
         'MEMUSAGE_LIMIT_MB': 2048,
         'MEMUSAGE_NOTIFY_MAIL': ['luisgerarhern@outlook.com'],
@@ -15,31 +16,29 @@ class ProductsSpider(scrapy.Spider):
         'USER_AGENT': 'LuisHernandez',
         'FEED_EXPORT_ENCODIG' : 'utf-8'
     }
-    def parse_product(self, response, **kwargs):
-        if kwargs:
-            products = kwargs['products']
-        product_name_xpath = '//span[@id="productTitle"]/text()'
-        product_price_xpath =  '//span[@id="priceblock_ourprice"]/text()'
-        product_name = response.xpath(product_name_xpath).get()
-        product_price = response.xpath(product_price_xpath).get()
-        yield{product_name,product_price}
 
+    def parse_search(self, response):
+        product_name_xpath = '//h2/a/span/text()'
+        product_price_xpath = '//span[@class = "a-price-whole"]/text()'
+        all_products_xpath = '//div[@data-component-type="s-search-result"]'
+        products_list = response.xpath(all_products_xpath).getall()
+        print(f'{"*"*50}\n\n')
+        products = []
+        for produc_html in products_list:
+            product_response = htmlres(url='producto',body=produc_html,encoding='utf-8')
+            product_name = product_response.xpath(product_name_xpath).get() 
+            product_price = product_response.xpath(product_price_xpath).get()
+            print(f'[{product_name}\t-\t{product_price}]')
+            products.append({product_name,product_price})
+        
+        yield products
+
+            
     def parse(self, response):
         search = getattr(self, 'search', None)
         if search:
             print(f'{"*"*50}\n\n')
             search = 's?k={}'.format(search.replace(' ','+'))
-            yield response.follow(search, callback= self.parse)
-            next_page_xpath = '//li[@class="a-last"]/a/@href'
-            links_xpath = '//div[@class="a-section aok-relative s-image-square-aspect"]/../@href'
-            next_page_button = response.xpath(next_page_xpath).get()
+            yield response.follow(search, callback= self.parse_search)
             
-            for i in range(3):
-                product_list = response.xpath(links_xpath).getall()
-                for product in product_list:
-                    yield response.follow(product, callback = self.parse_product)
-                yield response.follow(next_page_button, callback = self.parse)
-            
-                        
-
-            
+    #facundo 

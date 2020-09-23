@@ -1,5 +1,7 @@
 venv/
 __pycache__/
+*.csv
+*.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
