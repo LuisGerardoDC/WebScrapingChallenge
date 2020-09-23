@@ -29,9 +29,12 @@ class ProductsSpider(scrapy.Spider):
             product_name = product_response.xpath(product_name_xpath).get() 
             product_price = product_response.xpath(product_price_xpath).get()
             print(f'[{product_name}\t-\t{product_price}]')
-            products.append({product_name,product_price})
+            products.append({
+                'name':product_name,
+                'price':product_price
+            })
         
-        yield products
+        yield {'products':products}
 
             
     def parse(self, response):
